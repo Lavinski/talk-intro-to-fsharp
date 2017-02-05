@@ -1,0 +1,7 @@
+#r "mscorlib"
+#r "FSharp.Core, Version=$(TargetFSharpCoreVersion), Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
+#r "System"
+#r "System.Core"
+#r "System.Numerics"
+#r "..\\..\\packages\\Serilog\\lib\\net45\\Serilog.dll"
+#load "Logging.fs"

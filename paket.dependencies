@@ -1,0 +1,20 @@
+framework: auto-detect
+redirects: on
+source https://www.nuget.org/api/v2
+
+nuget FSharp.Core
+
+nuget Serilog
+nuget Serilog.Sinks.ColoredConsole
+nuget Akka
+#nuget Akka.TestKit.Xunit2
+
+nuget FsUnit.xUnit
+nuget xunit.runner.visualstudio
+
+group Build
+    redirects: off
+    source https://nuget.org/api/v2
+
+    nuget FAKE
+	#nuget FSharp.Data
