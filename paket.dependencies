@@ -7,10 +7,19 @@ nuget FSharp.Core
 nuget Serilog
 nuget Serilog.Sinks.ColoredConsole
 nuget Akka
+nuget Akka.FSharp
 #nuget Akka.TestKit.Xunit2
+
+nuget FsPickler 2.4.0
 
 nuget FsUnit.xUnit
 nuget xunit.runner.visualstudio
+
+nuget FSharp.Data
+nuget FSharp.Data.Toolbox.Twitter
+
+source ./artifacts
+nuget Logging
 
 group Build
     redirects: off

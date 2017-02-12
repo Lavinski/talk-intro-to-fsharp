@@ -1,2 +1,7 @@
 FSharp.Core
 Serilog
+Logging
+Akka
+Akka.FSharp
+FSharp.Data
+FSharp.Data.Toolbox.Twitter

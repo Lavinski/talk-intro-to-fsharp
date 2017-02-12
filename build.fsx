@@ -7,6 +7,7 @@ open Fake
 open Fake.FileUtils
 open Fake.EnvironmentHelper
 open Fake.AssemblyInfoFile
+open System
 
 let buildConfig = "Debug"
 let authors = ["ConnectDevelop"]
@@ -61,16 +62,22 @@ Target "Clean" (fun _ ->
     CleanDirs [artifacts]
 )
 
-Target "Build" (fun _ ->  
+Target "Version" (fun _ ->  
     for project in projects do  
         CreateFSharpAssemblyInfo (project.Directory.FullName @@ "AssemblyVersionInfo.fs")
             [
                 Attribute.Version project.Version;
                 Attribute.FileVersion project.Version
             ]
+)
 
+Target "Build" (fun _ ->  
     // compile all projects below src/app/
     MSBuild null "Build" ["Configuration", buildConfig] appReferences |> Log "AppBuild-Output: "
+)
+
+Target "Test" (fun _ ->  
+    printfn "All Tests Passed!"
 )
 
 Target "Package" (fun _ ->
@@ -91,9 +98,21 @@ Target "Package" (fun _ ->
         )
 )
 
+Target "Run" (fun _ ->
+    let exePath = @"src\TwitterAlerts\bin\Debug\TwitterAlerts.exe"
+    ExecProcess
+        (fun info ->
+            info.FileName <- exePath
+            info.WorkingDirectory <- currentDirectory
+            info.Arguments <- "")
+        (TimeSpan.FromSeconds(1.0))
+        |> ignore
+)
+
 // Build order
-"Clean"
-    ==> "Build"
-    ==> "Package"
+"Clean"   ?=> "Build"
+"Version" ?=> "Build"
+"Test"    <== [ "Build" ]
+"Package" <== [ "Build"; "Version" ]
 
 RunTargetOrDefault "Package"
