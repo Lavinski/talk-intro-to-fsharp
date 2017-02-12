@@ -15,9 +15,3 @@ let logInfoFormat message arguments =
 
 
 logInfoFormat "Log {Message} and {number} and {char}" ["Everything!"; 1; 'b']
-
-
-let a (x:seq<obj>) =
-    Seq.length x
-
-a [1; 2; 3; 4] |> printfn "%i"

@@ -13,8 +13,8 @@ let authors = ["ConnectDevelop"]
 
 // Directories
 let artifacts = "./artifacts"
-let buildDir  = System.IO.Path.GetFullPath(artifacts + "/build/")
-let deployDir = System.IO.Path.GetFullPath(artifacts + "/deploy/")
+
+//System.IO.Path.GetFullPath
 
 // Filesets
 let appReferences  =
@@ -75,17 +75,16 @@ Target "Build" (fun _ ->
 
 Target "Package" (fun _ ->
  
-    CreateDir buildDir
-    CreateDir deployDir
-
+    CreateDir artifacts
     for project in projects do
+
         Paket.Pack (fun p -> 
             { p with
                 BuildConfig = buildConfig;
                 Version = project.Version;
                 TemplateFile = project.TemplatePath;
-                WorkingDir = buildDir;
-                OutputPath = deployDir; //"..\\.." @@ 
+                WorkingDir = artifacts;
+                OutputPath = ".";
                 IncludeReferencedProjects = true;
                 BuildPlatform = "AnyCPU"
             }
@@ -97,4 +96,4 @@ Target "Package" (fun _ ->
     ==> "Build"
     ==> "Package"
 
-RunTargetOrDefault "Clean"
+RunTargetOrDefault "Package"

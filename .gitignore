@@ -3,6 +3,9 @@
 ### Paket ###
 packages/
 
+### FAKE ###
+AssemblyVersionInfo.fs
+
 ### F# ###
 lib/debug
 lib/release
