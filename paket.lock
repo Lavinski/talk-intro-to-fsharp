@@ -44,6 +44,8 @@ NUGET
     xunit.extensibility.execution (2.1)
       xunit.extensibility.core (2.1)
     xunit.runner.visualstudio (2.1)
+  remote: ./nugetfeed
+    WindowsNotifications (1.0.0)
 
 GROUP Build
 REDIRECTS: OFF

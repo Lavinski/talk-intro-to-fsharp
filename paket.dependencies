@@ -21,6 +21,9 @@ nuget FSharp.Data.Toolbox.Twitter
 source ./artifacts
 nuget Logging
 
+source ./nugetfeed
+nuget WindowsNotifications
+
 group Build
     redirects: off
     source https://nuget.org/api/v2
