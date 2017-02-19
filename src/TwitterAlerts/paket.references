@@ -1,8 +1,9 @@
 FSharp.Core
 Serilog
-Logging
+Serilog.Sinks.ColoredConsole
 Akka
 Akka.FSharp
 FSharp.Data
 FSharp.Data.Toolbox.Twitter
 WindowsNotifications
+FSharpTalk.Logging

@@ -18,10 +18,8 @@ nuget xunit.runner.visualstudio
 nuget FSharp.Data
 nuget FSharp.Data.Toolbox.Twitter
 
-source ./artifacts
-nuget Logging
-
 source ./nugetfeed
+nuget FSharpTalk.Logging
 nuget WindowsNotifications
 
 group Build

@@ -2,3 +2,4 @@ type project
 licenseUrl http://opensource.org/licenses/MIT
 Authors Daniel Little
 Version 0.0.1
+id FSharpTalk.Logging

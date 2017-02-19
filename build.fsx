@@ -26,6 +26,9 @@ let appReferences  =
 let projectsToPackage =
     !! "./src/**/paket.template"
 
+let executables =
+    !! "./src/**/bin/Debug/*.exe"
+
 type Project = {
     Name: string;
     Directory: System.IO.DirectoryInfo;
@@ -99,20 +102,18 @@ Target "Package" (fun _ ->
 )
 
 Target "Run" (fun _ ->
-    let exePath = @"src\TwitterAlerts\bin\Debug\TwitterAlerts.exe"
-    ExecProcess
-        (fun info ->
-            info.FileName <- exePath
-            info.WorkingDirectory <- currentDirectory
-            info.Arguments <- "")
-        (TimeSpan.FromSeconds(1.0))
-        |> ignore
+    logfn "Found %i executables" (executables |> Seq.length)
+    for executable in executables do
+        logfn "Running: %s" executable
+
+        System.Diagnostics.Process.Start(executable, "") |> ignore
 )
 
 // Build order
 "Clean"   ?=> "Build"
 "Version" ?=> "Build"
 "Test"    <== [ "Build" ]
-"Package" <== [ "Build"; "Version" ]
+"Package" <== [ "Version"; "Build"; ]
+"Run" <== [ "Version"; "Build"; "Test" ]
 
-RunTargetOrDefault "Package"
+RunTargetOrDefault "Build"

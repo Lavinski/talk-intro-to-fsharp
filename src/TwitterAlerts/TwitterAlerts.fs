@@ -1,24 +1,21 @@
 namespace TwitterAlerts
 module Main =
 
-    // Actors
     open Akka
     open Akka.Actor
     open Akka.FSharp
     open System
-
+    open Serilog
+    open FSharpTalk.Logging
     open FSharp.Data.Toolbox.Twitter
 
     let key = "mKQL29XNemjQbLlQ8t0pBg"
     let secret = "T27HLDve1lumQykBUgYAbcEkbDrjBe6gwbu0gqi4saM"
 
+    // Types
 
-    let schedule (system: ActorSystem) actor message =
-        system
-            .Scheduler
-            .ScheduleTellRepeatedly(TimeSpan.FromSeconds(0.0), TimeSpan.FromSeconds(5.0), actor, message);
-
-    type TwitterFeed = TwitterFeed of string
+    type TwitterFeed = 
+        TwitterFeed of string
 
     type WatcherMessages = 
         | WatchFeed of TwitterFeed
@@ -30,63 +27,106 @@ module Main =
             Feed: TwitterFeed;
         }
 
-    (*
-    let manager system watchers notifier =
-        spawn system "manager"
-            (fun mailbox ->
-                let rec loop() = actor {
-                    let! message = mailbox.Receive()
-                    
-                    match message with
-                    | WatchFeed(twitterFeed) -> 
-                        // Do validation
-                        watchers <! message
-
-                    return! loop()
-                }
-                loop())
-    *)
-
     type FeedMessages = 
         | PollFeed
 
-    let feed parent notifier feed =
-        spawn parent "feed"
+    type ConsoleMessages = 
+        | ReadNextLine
+
+    // Functions
+
+    let schedule (system: ActorSystem) actor message =
+        system
+            .Scheduler
+            .ScheduleTellRepeatedly(TimeSpan.FromSeconds(0.0), TimeSpan.FromSeconds(5.0), actor, message);
+
+    let logWith (log: ILogger) (propertyName:string) (value:obj) =
+        log.ForContext(propertyName, value)
+
+    // Actors
+
+    let console log system watchers =
+        let log = logWith log "ActorName" "Console"
+        spawn system "console"
             (fun mailbox ->
 
+                mailbox.Self <! ReadNextLine
+
+                let rec loop() = actor {
+                    let! message = mailbox.Receive()
+
+                    match message with
+                    | ReadNextLine -> 
+                        let input = Console.ReadLine().Trim()
+
+                        match input with
+                        | "exit" -> 
+                            mailbox.Context.System.Terminate() |> ignore
+                            return ()
+                        | _ ->
+                            watchers <! WatchFeed(TwitterFeed(input))
+                            mailbox.Self <! ReadNextLine
+                            return! loop()
+                }
+                loop())
+
+    let feed log parent notifier feed =
+        let log = logWith log "ActorName" "Feed"
+        spawnOpt parent null
+            (fun mailbox ->
                 schedule mailbox.Context.System mailbox.Self PollFeed
                 let twitter = Twitter.AuthenticateAppOnly(key, secret)
 
                 let rec loop state = actor {
                     let! message = mailbox.Receive()
 
-                    match message with
-                    | PollFeed ->
-                        let (TwitterFeed feedName) = feed
-                        let latestTweets = twitter.Search.Tweets("#fsharp", count = 100)
+                    let newState = 
+                        match message with
+                        | PollFeed ->
+                            let (TwitterFeed feedName) = feed
+                            logInfoFormat log "Polling feed {@FeedName} for new tweets" [ feedName ]
 
-                        for status in latestTweets.Statuses do
-                            notifier <! { Feed = feed; User = "???"; Text = status.Text }
+                            let latestTweets = twitter.Search.Tweets(feedName, count = 1)
 
-                    return! loop state
+                            let newTweets = latestTweets.Statuses |> Seq.filter (fun tweet -> not (state |> List.contains tweet.Id))
+
+                            if not (state |> List.isEmpty) then
+                                for status in newTweets do
+                                    notifier <! { Feed = feed; User = status.User.Name; Text = status.Text }
+
+                            let seenTweets = latestTweets.Statuses |> Seq.map (fun tweet -> tweet.Id) |> Seq.toList
+                            seenTweets
+
+                    return! loop newState
                 }
-                loop [])
+                loop []
+            )
+            [
+                SpawnOption.SupervisorStrategy (Strategy.OneForOne (fun error -> Directive.Stop))
+            ]
 
-    let watchers system notifier =
-        spawn system "watchers"
+    let watchers log system notifier =
+        let log = logWith log "ActorName" "Watchers"
+        spawnOpt system "watchers"
             (fun mailbox ->
                 let rec loop() = actor {
                     let! message = mailbox.Receive()
 
                     match message with
                     | WatchFeed(twitterFeed) ->
-                        feed mailbox notifier twitterFeed |> ignore
+                        logInfoFormat log "Watching new twitter feed {@TwitterFeed}" [ twitterFeed ]
+                        feed log mailbox notifier twitterFeed |> ignore
 
                     return! loop()
                 }
-                loop())
+                loop()
+            )
+            [
+                SpawnOption.SupervisorStrategy (Strategy.OneForOne (fun error -> Directive.Restart))
+            ]
 
-    let notifier system =
+    let notifier log system =
+        let log = logWith log "ActorName" "Notifier"
         spawn system "notifier"
             (fun mailbox ->
 
@@ -96,6 +136,7 @@ module Main =
                     let! (message:NewTweet) = mailbox.Receive()
 
                     let (TwitterFeed feedName) = message.Feed
+                    logInfo log "Notifying of new tweet"
                     notifier.Toast(sprintf "New Tweet: %s" feedName, message.Text, message.User)
 
                     return! loop()
@@ -105,15 +146,23 @@ module Main =
     [<EntryPoint>]
     let main argv =
 
+        let log = 
+            LoggerConfiguration()
+                .WriteTo.ColoredConsole()
+                .CreateLogger()
+
         use system = System.create "my-system" (Configuration.load())
 
-        let notifier = notifier system
-        let watcher = watchers system notifier
+        let notifier = notifier log system
+        let watcher = watchers log system notifier
+        let console = console log system watcher
 
-        watcher <! WatchFeed(TwitterFeed "Trump")
+        logInfo log "Ready!"
+
+        //watcher <! WatchFeed(TwitterFeed "FSharp")
 
         system.WhenTerminated
             |> Async.AwaitTask
-            |> Async.Start
+            |> Async.RunSynchronously
 
         0 // return an integer exit code
