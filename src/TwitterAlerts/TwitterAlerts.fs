@@ -9,10 +9,13 @@ module Main =
     open FSharpTalk.Logging
     open FSharp.Data.Toolbox.Twitter
 
-    let key = "mKQL29XNemjQbLlQ8t0pBg"
-    let secret = "T27HLDve1lumQykBUgYAbcEkbDrjBe6gwbu0gqi4saM"
-
     // Types
+
+    type TwitterCreds = 
+        {
+            Key: string;
+            Secret: string;
+        }
 
     type TwitterFeed = 
         TwitterFeed of string
@@ -35,6 +38,13 @@ module Main =
 
     // Functions
 
+    let loadKeys () =
+        let lines = System.IO.File.ReadLines("C:\\Projects\\twitterCreds.txt") |> Seq.toArray
+        {
+            Key = lines.[0].Trim();
+            Secret = lines.[1].Trim();
+        }
+
     let schedule (system: ActorSystem) actor message =
         system
             .Scheduler
@@ -56,7 +66,8 @@ module Main =
                     let! message = mailbox.Receive()
 
                     match message with
-                    | ReadNextLine -> 
+                    | ReadNextLine ->
+                        Console.Write("What do you want to listen for: ")
                         let input = Console.ReadLine().Trim()
 
                         match input with
@@ -70,12 +81,12 @@ module Main =
                 }
                 loop())
 
-    let feed log parent notifier feed =
+    let feed log parent notifier feed (creds:TwitterCreds) =
         let log = logWith log "ActorName" "Feed"
         spawnOpt parent null
             (fun mailbox ->
                 schedule mailbox.Context.System mailbox.Self PollFeed
-                let twitter = Twitter.AuthenticateAppOnly(key, secret)
+                let twitter = Twitter.AuthenticateAppOnly(creds.Key, creds.Secret)
 
                 let rec loop state = actor {
                     let! message = mailbox.Receive()
@@ -105,7 +116,7 @@ module Main =
                 SpawnOption.SupervisorStrategy (Strategy.OneForOne (fun error -> Directive.Stop))
             ]
 
-    let watchers log system notifier =
+    let watchers log system notifier (creds:TwitterCreds) =
         let log = logWith log "ActorName" "Watchers"
         spawnOpt system "watchers"
             (fun mailbox ->
@@ -115,7 +126,7 @@ module Main =
                     match message with
                     | WatchFeed(twitterFeed) ->
                         logInfoFormat log "Watching new twitter feed {@TwitterFeed}" [ twitterFeed ]
-                        feed log mailbox notifier twitterFeed |> ignore
+                        feed log mailbox notifier twitterFeed creds |> ignore
 
                     return! loop()
                 }
@@ -148,18 +159,18 @@ module Main =
 
         let log = 
             LoggerConfiguration()
-                .WriteTo.ColoredConsole()
+                //.WriteTo.ColoredConsole()
                 .CreateLogger()
+
+        let twitterCreds = loadKeys ()
 
         use system = System.create "my-system" (Configuration.load())
 
         let notifier = notifier log system
-        let watcher = watchers log system notifier
+        let watcher = watchers log system notifier twitterCreds
         let console = console log system watcher
 
         logInfo log "Ready!"
-
-        //watcher <! WatchFeed(TwitterFeed "FSharp")
 
         system.WhenTerminated
             |> Async.AwaitTask
