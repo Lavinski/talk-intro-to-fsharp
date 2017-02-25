@@ -1,23 +1,20 @@
 // include Fake libs
 #r "./packages/build/FAKE/tools/FakeLib.dll"
 
-System.Environment.CurrentDirectory = __SOURCE_DIRECTORY__
-
 open Fake
 open Fake.FileUtils
 open Fake.EnvironmentHelper
 open Fake.AssemblyInfoFile
 open System
 
+System.Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
+
 let buildConfig = "Debug"
-let authors = ["ConnectDevelop"]
 
 // Directories
 let artifacts = "./artifacts"
 
-//System.IO.Path.GetFullPath
-
-// Filesets
+// Projects
 let appReferences  =
     !! "./src/**/*.csproj"
     ++ "./src/**/*.fsproj"
