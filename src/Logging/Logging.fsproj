@@ -43,7 +43,7 @@
     <Compile Include="Logging.fs" />
     <None Include="Script.fsx" />
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Condition="Exists('AssemblyVersionInfo.fs')" Include="AssemblyInfo.fs" />
+    <Compile Condition="Exists('AssemblyVersionInfo.fs')" Include="AssemblyVersionInfo.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <Choose>

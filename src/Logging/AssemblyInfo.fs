@@ -1,4 +1,4 @@
-﻿namespace Logging.AssemblyInfo
+﻿namespace Logging.AssemblyInfo2
 
 open System.Reflection
 open System.Runtime.CompilerServices

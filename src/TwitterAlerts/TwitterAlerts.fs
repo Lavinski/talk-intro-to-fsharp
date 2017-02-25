@@ -10,7 +10,6 @@ module Main =
     open FSharp.Data.Toolbox.Twitter
 
     // Types
-
     type TwitterCreds = 
         {
             Key: string;
@@ -59,9 +58,8 @@ module Main =
         let log = logWith log "ActorName" "Console"
         spawn system "console"
             (fun mailbox ->
-
                 mailbox.Self <! ReadNextLine
-
+                
                 let rec loop() = actor {
                     let! message = mailbox.Receive()
 
@@ -159,6 +157,7 @@ module Main =
 
         let log = 
             LoggerConfiguration()
+                .WriteTo.Seq("http://localhost:5341")
                 //.WriteTo.ColoredConsole()
                 .CreateLogger()
 

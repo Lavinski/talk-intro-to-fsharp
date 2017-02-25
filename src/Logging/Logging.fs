@@ -4,7 +4,6 @@ module Logging =
 
     open System
     open Serilog
-    //open Microsoft.FSharp.Collections
 
     let createLogger () =
         Serilog.LoggerConfiguration()

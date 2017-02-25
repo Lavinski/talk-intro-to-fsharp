@@ -71,8 +71,7 @@ Target "Version" (fun _ ->
             ]
 )
 
-Target "Build" (fun _ ->  
-    // compile all projects below src/app/
+Target "Build" (fun _ ->
     MSBuild null "Build" ["Configuration", buildConfig] appReferences |> Log "AppBuild-Output: "
 )
 
@@ -81,10 +80,8 @@ Target "Test" (fun _ ->
 )
 
 Target "Package" (fun _ ->
- 
     CreateDir artifacts
     for project in projects do
-
         Paket.Pack (fun p -> 
             { p with
                 BuildConfig = buildConfig;
@@ -99,10 +96,8 @@ Target "Package" (fun _ ->
 )
 
 Target "Run" (fun _ ->
-    logfn "Found %i executables" (executables |> Seq.length)
     for executable in executables do
         logfn "Running: %s" executable
-
         System.Diagnostics.Process.Start(executable, "") |> ignore
 )
 
