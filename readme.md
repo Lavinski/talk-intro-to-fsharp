@@ -1,12 +1,5 @@
 # Introduction to FSharp
 
- > We'll be making a twitter scanner that alerts people when a tweet contains a certain work appears on their timeline. 
-
- - Step one, we'll create a NuGet package to wrap up the alert API over twitter.
- - Step two, we'll use Akka.NET to build the alert service
-
-## Introduction 
-
 > High-level overview of that we'll be doing
 
  - Leaning the basics of F#
