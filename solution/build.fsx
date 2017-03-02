@@ -11,7 +11,6 @@ let buildConfig = "Debug"
 
 let deployDir = "./deploy/"
 
-
 // Filesets
 let appReferences  =
     !! "/**/*.csproj"
@@ -20,7 +19,7 @@ let appReferences  =
 let packages = 
     !! "src/**/paket.template"
 
-type ProjectInfo = 
+type ProjectInfo =
     {
         ProjectName: string;
         ProjectPath: string;
@@ -90,10 +89,10 @@ Target "Run" (fun _ ->
 )
 
 // Build order
-"Clean" ?=> "Build"
+"Clean"   ?=> "Build"
 "Version" ?=> "Clean"
-"Build" <== [ "Clean"; "Version" ]
-"Run" <== [ "Version"; "Build" ]
+"Build"   <== [ "Clean"; "Version" ]
+"Run"     <== [ "Version"; "Build" ]
 "Package" <== [ "Clean"; "Version"; "Build"; ]
 
 // start build

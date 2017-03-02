@@ -17,7 +17,6 @@ nuget FSharp.Data.Toolbox.Twitter
 
 nuget WindowsNotifications
 
-
 group Build
     redirects: off
     source https://nuget.org/api/v2

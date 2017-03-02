@@ -1,6 +1,6 @@
 {
 	"Create Serilog Config": {
-		"prefix": "talk",
+		"prefix": "talk-log",
 		"body": [
 			"Serilog.LoggerConfiguration()$0",
 			"    .CreateLogger()"
@@ -8,7 +8,7 @@
 		"description": "Create a Serilog Logger from empty config"
 	},
 	"Create Custom Console Sink": {
-		"prefix": "talk",
+		"prefix": "talk-log",
 		"body": [
 			"",
 			"    .WriteTo.Sink({ new Core.ILogEventSink with",
@@ -19,7 +19,7 @@
 		"description": "Create Custom Console Sink"
 	},
 	"Create Functions For Error Logging": {
-		"prefix": "talk",
+		"prefix": "talk-log",
 		"body": [
 			"    let logError (logger:ILogger) message =",
 			"        logger.Error(message)",
@@ -36,14 +36,14 @@
 		"description": "Create Functions For Error Logging"
 	},
 	"Script Include #r Serilog": {
-		"prefix": "talk",
+		"prefix": "talk-log",
 		"body": [
 			"..\\..\\packages\\Serilog\\lib\\net45\\Serilog.dll"
 		],
 		"description": "Script Include #r Serilog"
 	},
 	"Create Load Keys Function": {
-		"prefix": "talk",
+		"prefix": "talk-tw",
 		"body": [
 			"let loadKeys () =",
 			"    let lines = System.IO.File.ReadLines(\"C:\\Projects\\twitterCreds.txt\") |> Seq.toArray",
@@ -55,17 +55,17 @@
 		"description": "Script Include #r Serilog"
 	},
 	"Create Schedule Function": {
-		"prefix": "talk",
+		"prefix": "talk-tw",
 		"body": [
-			"    let schedule (system: ActorSystem) actor message =\r",
-			"        system\r",
-			"            .Scheduler\r",
-			"            .ScheduleTellRepeatedly(TimeSpan.FromSeconds(0.0), TimeSpan.FromSeconds(5.0), actor, message);"
+			"let schedule (system: ActorSystem) actor message =\r",
+			"    system\r",
+			"        .Scheduler\r",
+			"        .ScheduleTellRepeatedly(TimeSpan.FromSeconds(0.0), TimeSpan.FromSeconds(5.0), actor, message);"
 		],
 		"description": "Creates a function to schedule messages for actors"
 	},
 	"Create Actor": {
-		"prefix": "talk",
+		"prefix": "talk-tw",
 		"body": [
 			"let ${1:actorFunc} log =",
 			"    let log = logWith log \"ActorName\" \"${1:actorName}\"",
@@ -79,67 +79,80 @@
 		"description": "Create empty actor"
 	},
 	"Create Log With Function": {
-		"prefix": "talk",
+		"prefix": "talk-tw",
 		"body": [
-			"    let logWith (log: ILogger) (propertyName:string) (value:obj) =\r",
-			"        log.ForContext(propertyName, value)"
+			"let logWith (log: ILogger) (propertyName:string) (value:obj) =\r",
+			"    log.ForContext(propertyName, value)"
 		],
 		"description": "Creates new logger with extra property on all messages"
 	},
-	"Create Seq Logger": {
-		"prefix": "talk",
+	"Create Seq Logger Serilog": {
+		"prefix": "talk-tw",
 		"body": [
 			"LoggerConfiguration()\r",
-			"                .WriteTo.Seq(\"http://localhost:5341\")\r",
-			"                .CreateLogger()"
+			"    .WriteTo.Seq(\"http://localhost:5341\")\r",
+			"    .CreateLogger()"
 		],
 		"description": "Create Seq Logger"
 	},
 	"Create Actor System": {
-		"prefix": "talk",
+		"prefix": "talk-tw",
 		"body": [
 			"use system = System.create \"my-system\" (Configuration.load())"
 		],
 		"description": "Create actor system"
 	},
-	"Wait for system shutdown": {
-		"prefix": "talk",
+	"Wait for system shutdown or terminated": {
+		"prefix": "talk-tw",
 		"body": [
-			"        system.WhenTerminated\r",
-			"            |> Async.AwaitTask\r",
-			"            |> Async.RunSynchronously"
+			"system.WhenTerminated\r",
+			"    |> Async.AwaitTask\r",
+			"    |> Async.RunSynchronously"
 		],
 		"description": "Wait for system shutdown"
 	},
 	"Add Supervisor Stategy": {
-		"prefix": "talk",
+		"prefix": "talk-tw",
 		"body": [
-			"            [\r",
-			"                SpawnOption.SupervisorStrategy (Strategy.OneForOne (fun error -> Directive.Restart))\r",
-			"            ]"
+			"[\r",
+			"    SpawnOption.SupervisorStrategy (Strategy.OneForOne (fun error -> Directive.Restart))\r",
+			"]"
 		],
 		"description": "Add supervisor Strategy"
 	},
 	"Create notification manager": {
-		"prefix": "talk",
+		"prefix": "talk-tw",
 		"body": [
 			"let notifier = WindowsNotifications.NotificationManager(\"TwitterAlerts\")"
 		],
 		"description": "Create Notification Manger"
 	},
 	"Create Twitter Client": {
-		"prefix": "talk",
+		"prefix": "talk-tw",
 		"body": [
 			"let twitter = Twitter.AuthenticateAppOnly(creds.Key, creds.Secret)"
 		],
 		"description": "Create Twitter Client"
 	},
 	"Terminate Actor System": {
-		"prefix": "talk",
+		"prefix": "talk-tw",
 		"body": [
 			"mailbox.Context.System.Terminate() |> ignore"
 		],
 		"description": "Terminate Actor System"
+	},
+	"Add open": {
+		"prefix": "talk-tw",
+		"body": [
+			"open Akka\r",
+			"open Akka.Actor\r",
+			"open Akka.FSharp\r",
+			"open System\r",
+			"open Serilog\r",
+			"open LoggingHelpers\r",
+			"open FSharp.Data.Toolbox.Twitter"
+		],
+		"description": "Add open statements for twitter app"
 	},
 	"Add FAKE openings": {
 		"prefix": "talk-fake",
@@ -184,10 +197,10 @@
 		"prefix": "talk-fake",
 		"body": [
 			"CreateFSharpAssemblyInfo (project.Directory.FullName @@ \"AssemblyVersionInfo.fs\")\r",
-			"            [\r",
-			"                Attribute.Version project.Version;\r",
-			"                Attribute.FileVersion project.Version\r",
-			"            ]"
+			"    [\r",
+			"        Attribute.Version project.Version;\r",
+			"        Attribute.FileVersion project.Version\r",
+			"    ]"
 		],
 		"description": "Create FSharp Assembly Info"
 	},
@@ -208,13 +221,6 @@
 		],
 		"description": "Paket Pack"
 	},
-	"undefined": {
-		"body": [
-			"for executable in executables do\r",
-			"        logfn \"Running: %s\" executable\r",
-			"        System.Diagnostics.Process.Start(executable, \"\") |> ignore"
-		]
-	},
 	"Run executables": {
 		"prefix": "talk-fake",
 		"body": [
@@ -230,9 +236,7 @@
 			"// Build order\r",
 			"\"Clean\"   ?=> \"Build\"\r",
 			"\"Version\" ?=> \"Build\"\r",
-			"\"Test\"    <== [ \"Build\" ]\r",
-			"\"Package\" <== [ \"Version\"; \"Build\"; ]\r",
-			"\"Run\" <== [ \"Version\"; \"Build\"; \"Test\" ]\r",
+			"\"Package\" <== [ \"Version\"; \"Build\"; \"Clean\" ]\r",
 			"\r",
 			"RunTargetOrDefault \"Build\""
 		],
@@ -244,5 +248,36 @@
 			"MSBuild null \"Build\" [\"Configuration\", buildConfig] appReferences |> Log \"AppBuild-Output: \""
 		],
 		"description": "MSBuild"
+	},
+	"Twitter Creds": {
+		"prefix": "talk-tw",
+		"body": [
+			"type TwitterCreds = \r",
+			"    {\r",
+			"        Key: string;\r",
+			"        Secret: string;\r",
+			"    }\r",
+			"\r",
+			"let loadKeys () =\r",
+			"    let lines = System.IO.File.ReadLines(@\"C:\\\\Projects\\\\twitterCreds.txt\") |> Seq.toArray\r",
+			"    {\r",
+			"        Key = lines.[0].Trim();\r",
+			"        Secret = lines.[1].Trim();\r",
+			"    }"
+		]
+	},
+	"Add Run Step for Fake": {
+		"prefix": "talk-fake",
+		"body": [
+			"let executables =\r",
+			"    !! \"./src/**/bin/Debug/*.exe\"\r",
+			"\r",
+			"Target \"Run\" (fun _ ->\r",
+			"    for executable in executables do\r",
+			"        logfn \"Running: %s\" executable\r",
+			"        System.Diagnostics.Process.Start(executable, \"\") |> ignore\r",
+			")"
+		],
+		"description": "Add Run Step for Fake"
 	}
 }
