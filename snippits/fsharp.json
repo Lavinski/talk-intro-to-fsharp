@@ -38,7 +38,7 @@
 	"Script Include #r Serilog": {
 		"prefix": "talk-log",
 		"body": [
-			"..\\..\\packages\\Serilog\\lib\\net45\\Serilog.dll"
+			"#r @\"..\\..\\packages\\Serilog\\lib\\net45\\Serilog.dll\""
 		],
 		"description": "Script Include #r Serilog"
 	},

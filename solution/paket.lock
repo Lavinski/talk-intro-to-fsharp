@@ -1,5 +1,5 @@
 REDIRECTS: ON
-FRAMEWORK: NET45
+FRAMEWORK: NET45, NET462
 NUGET
   remote: https://www.nuget.org/api/v2
     Akka (1.1.3)
